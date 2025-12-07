@@ -20,7 +20,7 @@ Overall,  it offers a practical mix of speed, accuracy, and deployability for re
 ## 🚀 How to Run
 ### 1. Clone this repository
 ```bash
-git clone https://github.com/tss-shreya/EyeDetectionYOLO.git
+https://github.com/shreya-tss/Eye-Detection-with-YOLO.git
 cd EyeDetectionYOLO
 ```
 ### 2. Create 2 separate terminals 
