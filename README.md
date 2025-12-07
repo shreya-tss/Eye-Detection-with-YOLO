@@ -23,14 +23,11 @@ Overall,  it offers a practical mix of speed, accuracy, and deployability for re
 git clone https://github.com/your-username/EyeDetectionYOLO.git
 cd EyeDetectionYOLO
 ```
-### 2. Set-up the environment 
-```bash
-pip install -r requirements.txt
-```
-### 3. Create 2 separate terminals 
+### 2. Create 2 separate terminals 
 Terminal 1 
 ```bash
 cd Backend //navigate to backend
+pip install -r requirements.txt
 python EyeDetection.py
 ```
 Terminal 2
