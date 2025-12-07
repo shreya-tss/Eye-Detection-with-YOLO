@@ -1,164 +1,3 @@
-'''from flask import Flask, request , jsonify
-import firebase_admin
-from firebase_admin import credentials, firestore 
-from ultralytics import YOLO 
-import cv2
-import numpy as np 
-import base64
-from flask_cors import CORS  
-
-app=Flask(__name__)
-CORS(app)
-
-cred=credentials.Certificate("firebase_key.json")
-firebase_admin.initialize_app(cred)
-db=firestore.client()
-collection_name="eye_features"
-
-model = YOLO(r"C:\7th Sem\Saigeware\Backend\edm.pt")
-
-def extract_eye_features(cropped_eye):
-    gray = cv2.cvtColor(cropped_eye, cv2.COLOR_BGR2GRAY)
-    h, w = gray.shape
-    brightness=float(np.mean(gray))
-    openness=float(h/w) if w!=0 else 0
-    area=float(h*w)
-    half_w=w//2
-    left=gray[:,:half_w]
-    right = gray[:, w - half_w:]
-    right=cv2.flip(right, 1)
-    min_w=min(left.shape[1], right.shape[1])
-    left = left[:, :min_w]
-    right=right[:, :min_w]
-    symmetry = float(np.mean(cv2.absdiff(left, right)))
-    return {
-        "area": area,
-        "openness": openness,
-        "brightness": brightness,
-        "symmetry": symmetry
-    }
-
-@app.route("/upload", methods=["POST"])
-def upload_image():
-    data=request.json
-    img_b64=data.get("image")
-    img_bytes = base64.b64decode(img_b64)
-    nparr = np.frombuffer(img_bytes, np.uint8)
-    img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
-
-    results=model(img)[0]
-    features_list=[]
-
-    for box in results.xyxy.cpu().numpy():
-        x1, y1, x2, y2=map(int,box)
-        eye_crop=img[y1:y2, x1:x2]
-        if eye_crop.size==0:
-            continue
-        feats=extract_eye_features(eye_crop)
-        features_list.append(feats)
-    
-    doc_ref=db.collection(collection_name).document()
-    doc_ref.set({"features":features_list})
-
-    return jsonify({"status":"success", "saved_count":len(features_list)})
-
-@ app.route("/features", methods=["GET"])
-def get_features():
-    docs=db.collection(collection_name).stream()
-    all_features=[doc.to_dict() for doc in docs]
-    return jsonify(all_features)
-
-if __name__ =="__main__":
-    app.run(debug=True)'''
-'''
-from flask import Flask, request, jsonify
-from flask_cors import CORS
-import firebase_admin
-from firebase_admin import credentials, firestore
-from ultralytics import YOLO
-import cv2
-import numpy as np
-import base64
-
-# ------------------- Flask Setup -------------------
-app = Flask(__name__)
-# Allow React frontend (any origin) to make requests
-CORS(app, resources={r"/api/*": {"origins": "*"}})
-
-# ------------------- Firebase Setup -------------------
-cred = credentials.Certificate("firebase_key.json")
-firebase_admin.initialize_app(cred)
-db = firestore.client()
-collection_name = "eye_features"
-
-# ------------------- YOLO Model -------------------
-model = YOLO(r"C:\7th Sem\Saigeware\Backend\edm.pt")  # change path if needed
-
-
-def extract_eye_features(cropped_eye):
-    gray = cv2.cvtColor(cropped_eye, cv2.COLOR_BGR2GRAY)
-    h, w = gray.shape
-    brightness = float(np.mean(gray))
-    openness = float(h / w) if w != 0 else 0
-    area = float(h * w)
-    half_w = w // 2
-    left = gray[:, :half_w]
-    right = gray[:, w - half_w:]
-    right = cv2.flip(right, 1)
-    min_w = min(left.shape[1], right.shape[1])
-    left = left[:, :min_w]
-    right = right[:, :min_w]
-    symmetry = float(np.mean(cv2.absdiff(left, right)))
-
-    return {
-        "area": area,
-        "openness": openness,
-        "brightness": brightness,
-        "symmetry": symmetry
-    }
-@app.route("/api/upload", methods=["POST"])
-def upload_image():
-    print("POST /upload called")  # Debug
-    data = request.get_json()
-    if not data or "image" not in data:
-        return jsonify({"status": "error", "message": "No image provided"}), 400
-
-    img_b64 = data.get("image")
-    img_bytes = base64.b64decode(img_b64)
-    nparr = np.frombuffer(img_bytes, np.uint8)
-    img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
-    
-    if img is None:
-        return jsonify({"status": "error", "message": "Invalid image"}), 400
-
-    results = model(img)[0]
-    features_list = []
-
-    for box in results.xyxy.cpu().numpy():
-        x1, y1, x2, y2 = map(int, box)
-        eye_crop = img[y1:y2, x1:x2]
-        if eye_crop.size == 0:
-            continue
-        feats = extract_eye_features(eye_crop)
-        features_list.append(feats)
-
-    doc_ref = db.collection(collection_name).document()
-    doc_ref.set({"features": features_list})
-
-    print(f"Saved {len(features_list)} features")  # Debug
-    return jsonify({"status": "success", "saved_count": len(features_list)})
-
-# ------------------- Features Endpoint -------------------
-@app.route("/api/features", methods=["GET"])
-def get_features():
-    docs = db.collection(collection_name).stream()
-    all_features = [doc.to_dict() for doc in docs]
-    return jsonify(all_features)
-
-# ------------------- Main -------------------
-if __name__ == "__main__":
-    print("Starting Flask server on http://127.0.0.1:5000")
-    app.run(debug=True, threaded=True)'''
 
 from flask import Flask, request, jsonify
 from flask_cors import CORS
@@ -169,24 +8,24 @@ import cv2
 import numpy as np
 import base64
 
-# ------------------- Flask Setup -------------------
+# Flask Setup
 app = Flask(__name__)
 
 # Allow ALL origins during development
 CORS(app, resources={r"/*": {"origins": "*"}})
 
-# ------------------- Firebase Setup -------------------
+#  Firebase Setup 
 cred = credentials.Certificate("firebase_key.json")
 firebase_admin.initialize_app(cred)
 db = firestore.client()
 collection_name = "eye_features"
 
-# ------------------- YOLO Model -------------------
+# YOLO Model 
 # Load model once at startup (MUCH safer)
 model = YOLO(r"C:\7th Sem\Saigeware\Backend\edm.pt")
 
 
-# ------------------- Feature Extraction -------------------
+#  Feature Extraction
 def extract_eye_features(cropped_eye):
     gray = cv2.cvtColor(cropped_eye, cv2.COLOR_BGR2GRAY)
     h, w = gray.shape
@@ -214,7 +53,7 @@ def extract_eye_features(cropped_eye):
     }
 
 
-# ------------------- Upload Route -------------------
+#  Upload Route 
 @app.route("/api/upload", methods=["POST"])
 def upload_image():
     print("POST /api/upload called")
@@ -261,7 +100,7 @@ def upload_image():
     })
 
 
-# ------------------- Fetch Features Route -------------------
+#  Fetch Features
 @app.route("/api/features", methods=["GET"])
 def get_features():
     docs = db.collection(collection_name).stream()
@@ -269,7 +108,6 @@ def get_features():
     return jsonify(all_items)
 
 
-# ------------------- Main -------------------
 if __name__ == "__main__":
     print("🚀 Starting Flask at http://127.0.0.1:5000")
     # Threaded = prevents random fetch freezes
