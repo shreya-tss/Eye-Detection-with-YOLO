@@ -23,7 +23,10 @@ Overall,  it offers a practical mix of speed, accuracy, and deployability for re
 git clone https://github.com/shreya-tss/Eye-Detection-with-YOLO.git
 cd EyeDetectionYOLO
 ```
-### 2. Create 2 separate terminals 
+### 2. Setup Firebase 
+Create a new database in Firebase and replace firebase_key.json with your own credentials.
+
+### 3. Create 2 separate terminals 
 Terminal 1 
 ```bash
 cd Backend //navigate to backend
